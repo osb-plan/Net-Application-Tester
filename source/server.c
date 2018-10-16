@@ -75,11 +75,11 @@ void do_sent(PACKET_TYPE msg_type_id) {
 }
 
 void *do_periodic_sent(void *data) {
-/*    TODO ch_th = *(TODO *) data;
-    for (;;) {
-        do_sent(ch_th.msg_type_id);
-        usleep(ch_th.ms_interval * 1000);
-    }*/
+    /*    TODO ch_th = *(TODO *) data;
+        for (;;) {
+            do_sent(ch_th.msg_type_id);
+            usleep(ch_th.ms_interval * 1000);
+        }*/
 }
 
 int main(int argc, char *argv[]) {
@@ -134,21 +134,19 @@ int main(int argc, char *argv[]) {
 
         // Check log file
         struct stat sb;
-        if(!stat(l_flag, &sb))
-        {
+        if (!stat(l_flag, &sb)) {
             if ((sb.st_mode & S_IFMT) != S_IFREG) {
                 return EXIT_FAILURE;
-            }            
+            }
         }
 
 
-        if(!stat(d_flag, &sb))
-        {
+        if (!stat(d_flag, &sb)) {
             if ((sb.st_mode & S_IFMT) != S_IFREG) {
                 return EXIT_FAILURE;
-            }            
+            }
         }
-        
+
     } else {
         printf("ERROR control file logging option and dictionary file!\n");
         return EXIT_FAILURE;
@@ -176,8 +174,33 @@ int main(int argc, char *argv[]) {
 
     plog("Entered the main loop", INFO, 0);
 
+    xmlDocPtr doc;
+    xmlNodePtr cur;
 
+    doc = xmlParseFile(d_flag);
 
+    if (doc == NULL) {
+        fprintf(stderr, "Document not parsed successfully. \n");
+        return (0);
+    }
+
+    cur = xmlDocGetRootElement(doc);
+
+    if (cur == NULL) {
+        fprintf(stderr, "empty document\n");
+        xmlFreeDoc(doc);
+        return (0);
+    }
+
+    if (xmlStrcmp(cur->name, (const xmlChar *) "dictionary")) {
+        fprintf(stderr, "document of the wrong type, root node != config");
+        cur = cur->xmlChildrenNode;
+        xmlFreeDoc(doc);
+        return (0);
+    }
+    //parse_config(doc, cur);
+    printf("Ok ready for parsing\n");
+    parse_config(doc, cur);
 
 
     return 0;
