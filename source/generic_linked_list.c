@@ -8,20 +8,20 @@ typedef struct {
 typedef struct node {
     DATA data;
     struct node* next;
-} NODE;
+} ELEMENT;
 
-void init(NODE** head) {
+void init(ELEMENT** head) {
     *head = NULL;
 }
 
-void print_list(NODE* head) {
-    NODE * temp;
+void print_list(ELEMENT* head) {
+    ELEMENT * temp;
     for (temp = head; temp; temp = temp->next)
         printf("%5d", temp->data.info);
 }
 
-NODE* add(NODE* node, DATA data) {
-    NODE* temp = (NODE*) malloc(sizeof (NODE));
+ELEMENT* add(ELEMENT* node, DATA data) {
+    ELEMENT* temp = (NODE*) malloc(sizeof (NODE));
     if (temp == NULL) {
         exit(0); // no memory available
     }
@@ -31,28 +31,28 @@ NODE* add(NODE* node, DATA data) {
     return node;
 }
 
-void add_at(NODE* node, DATA data) {
-    NODE* temp = (NODE*) malloc(sizeof (NODE));
+void add_at(ELEMENT* node, DATA data) {
+    ELEMENT* temp = (ELEMENT*) malloc(sizeof (ELEMENT));
     if (temp == NULL) {
-        exit(EXIT_FAILURE); // no memory available
+        exit(EXIT_FAILURE);
     }
     temp->data = data;
     temp->next = node->next;
     node->next = temp;
 }
 
-void remove_node(NODE* head) {
-    NODE* temp = (NODE*) malloc(sizeof (NODE));
+void remove_node(ELEMENT* head) {
+    ELEMENT* temp = (ELEMENT*) malloc(sizeof (ELEMENT));
     if (temp == NULL) {
-        exit(EXIT_FAILURE); // no memory available
+        exit(EXIT_FAILURE); 
     }
     temp = head->next;
     head->next = head->next->next;
     free(temp);
 }
 
-NODE * reverse_rec(NODE * ptr, NODE * previous) {
-    NODE * temp;
+ELEMENT * reverse_rec(ELEMENT * ptr, ELEMENT* previous) {
+    ELEMENT * temp;
     if (ptr->next == NULL) {
         ptr->next = previous;
         return ptr;
@@ -63,9 +63,9 @@ NODE * reverse_rec(NODE * ptr, NODE * previous) {
     }
 }
 
-NODE * reverse(NODE * node) {
-    NODE * temp;
-    NODE * previous = NULL;
+ELEMENT * reverse(ELEMENT * node) {
+    ELEMENT * temp;
+    ELEMENT * previous = NULL;
     while (node != NULL) {
         temp = node->next;
         node->next = previous;
@@ -75,9 +75,9 @@ NODE * reverse(NODE * node) {
     return previous;
 }
 
-NODE *free_list(NODE *head) {
-    NODE *tmpPtr = head;
-    NODE *followPtr;
+ELEMENT *free_list(ELEMENT *head) {
+    ELEMENT *tmpPtr = head;
+    ELEMENT *followPtr;
     while (tmpPtr != NULL) {
         followPtr = tmpPtr;
         tmpPtr = tmpPtr->next;
@@ -86,8 +86,8 @@ NODE *free_list(NODE *head) {
     return NULL;
 }
 
-NODE *sort_list(NODE *head) {
-    NODE *tmpPtr = head, *tmpNxt = head->next;
+ELEMENT *sort_list(ELEMENT *head) {
+    ELEMENT *tmpPtr = head, *tmpNxt = head->next;
     DATA tmp;
     while (tmpNxt != NULL) {
         while (tmpNxt != tmpPtr) {

@@ -1,15 +1,15 @@
 #ifndef GENERIC_LINKED_LIST_H
 #define GENERIC_LINKED_LIST_H
 
-    void init(NODE** head);
-    void print_list(NODE* head);
-    NODE* add(NODE* node, DATA data);
-    void add_at(NODE* node, DATA data);
-    void remove_node(NODE* head);
-    NODE * reverse_rec(NODE * ptr, NODE * previous);
-    NODE * reverse(NODE * node);
-    NODE *free_list(NODE *head);
-    NODE *sort_list(NODE *head);
+    void init(ELEMENT** head);
+    void print_list(ELEMENT* head);
+    ELEMENT* add(ELEMENT* node, DATA data);
+    void add_at(ELEMENT* node, DATA data);
+    void remove_node(ELEMENT* head);
+    ELEMENT * reverse_rec(ELEMENT * ptr, NODE * previous);
+    ELEMENT * reverse(ELEMENT * node);
+    ELEMENT *free_list(ELEMENT *head);
+    ELEMENT *sort_list(ELEMENT *head);
 
 #endif
 
