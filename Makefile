@@ -4,7 +4,8 @@ LDFLAGS=-lpthread -lxml2
 INCDIR=-I./include -I/usr/include/libxml2/
 LIBDIR=-L/usr/lib/x86_64-linux-gnu
 SRCDIR=./source/
-SOURCES=$(SRCDIR)xmlHandle.c $(SRCDIR)server.c $(SRCDIR)bsp.c 
+SOURCES=$(SRCDIR)xmlHandle.c $(SRCDIR)server.c $(SRCDIR)bsp.c \
+    $(SRCDIR)generic_linked_list.c
     
 OBJECTS=$(SOURCES:.cpp=.o)
 	EXECUTABLE=server_test

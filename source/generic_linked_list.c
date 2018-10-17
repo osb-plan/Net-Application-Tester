@@ -1,48 +1,50 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include "../include/data_defs.h"
 
-typedef struct {
-    int info;
-} DATA;
 
-typedef struct node {
-    DATA data;
-    struct node* next;
-} ELEMENT;
-
-void init(ELEMENT** head) {
+void init(FIELD** head) {
     *head = NULL;
 }
 
-void print_list(ELEMENT* head) {
-    ELEMENT * temp;
+void print_list(FIELD* head) {
+    FIELD * temp;
+    printf("FIELD List:\n");
+    printf("-------------------------------------\n");
+    
     for (temp = head; temp; temp = temp->next)
-        printf("%5d", temp->data.info);
+    {
+        printf("%s \n", temp->field_info.field_name);
+        printf("%d \n", temp->field_info.field_type);
+        printf("%d \n", temp->field_info.variation.var_type);        
+    }
+    printf("-------------------------------------\n");
+
 }
 
-ELEMENT* add(ELEMENT* node, DATA data) {
-    ELEMENT* temp = (NODE*) malloc(sizeof (NODE));
+FIELD* add(FIELD* node, DATA data) {
+    FIELD* temp = (FIELD*) malloc(sizeof (FIELD));
     if (temp == NULL) {
         exit(0); // no memory available
     }
-    temp->data = data;
+    temp->field_info = data;
     temp->next = node;
     node = temp;
     return node;
 }
 
-void add_at(ELEMENT* node, DATA data) {
-    ELEMENT* temp = (ELEMENT*) malloc(sizeof (ELEMENT));
+void add_at(FIELD* node, DATA data) {
+    FIELD* temp = (FIELD*) malloc(sizeof (FIELD));
     if (temp == NULL) {
         exit(EXIT_FAILURE);
     }
-    temp->data = data;
+    temp->field_info = data;
     temp->next = node->next;
     node->next = temp;
 }
 
-void remove_node(ELEMENT* head) {
-    ELEMENT* temp = (ELEMENT*) malloc(sizeof (ELEMENT));
+void remove_node(FIELD* head) {
+    FIELD* temp = (FIELD*) malloc(sizeof (FIELD));
     if (temp == NULL) {
         exit(EXIT_FAILURE); 
     }
@@ -51,8 +53,8 @@ void remove_node(ELEMENT* head) {
     free(temp);
 }
 
-ELEMENT * reverse_rec(ELEMENT * ptr, ELEMENT* previous) {
-    ELEMENT * temp;
+FIELD * reverse_rec(FIELD * ptr, FIELD* previous) {
+    FIELD * temp;
     if (ptr->next == NULL) {
         ptr->next = previous;
         return ptr;
@@ -63,9 +65,9 @@ ELEMENT * reverse_rec(ELEMENT * ptr, ELEMENT* previous) {
     }
 }
 
-ELEMENT * reverse(ELEMENT * node) {
-    ELEMENT * temp;
-    ELEMENT * previous = NULL;
+FIELD * reverse(FIELD * node) {
+    FIELD * temp;
+    FIELD * previous = NULL;
     while (node != NULL) {
         temp = node->next;
         node->next = previous;
@@ -75,9 +77,9 @@ ELEMENT * reverse(ELEMENT * node) {
     return previous;
 }
 
-ELEMENT *free_list(ELEMENT *head) {
-    ELEMENT *tmpPtr = head;
-    ELEMENT *followPtr;
+FIELD *free_list(FIELD *head) {
+    FIELD *tmpPtr = head;
+    FIELD *followPtr;
     while (tmpPtr != NULL) {
         followPtr = tmpPtr;
         tmpPtr = tmpPtr->next;
@@ -86,21 +88,4 @@ ELEMENT *free_list(ELEMENT *head) {
     return NULL;
 }
 
-ELEMENT *sort_list(ELEMENT *head) {
-    ELEMENT *tmpPtr = head, *tmpNxt = head->next;
-    DATA tmp;
-    while (tmpNxt != NULL) {
-        while (tmpNxt != tmpPtr) {
-            if (tmpNxt->data.info < tmpPtr->data.info) {
-                tmp = tmpPtr->data;
-                tmpPtr->data = tmpNxt->data;
-                tmpNxt->data = tmp;
-            }
-            tmpPtr = tmpPtr->next;
-        }
-        tmpPtr = head;
-        tmpNxt = tmpNxt->next;
-    }
-    return tmpPtr;
-}
 

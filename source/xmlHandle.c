@@ -1,7 +1,75 @@
+/* System libraries */
+#include <stdint.h>
+#include <string.h>
+
+/* External libraries */
 #include <libxml/xmlversion.h>
 #include <libxml/xmlreader.h>
 #include <libxml/xmlstring.h>
 #include <libxml/tree.h>
+
+/* Application header */
+#include "../include/data_defs.h"
+
+int convert_field_type(char * str)
+{
+    int en = -1;
+    
+    if( strcmp(str,"bit") == 0)
+    {
+ 	printf("Bit\n"); 
+	en = 0;
+    }else if (strcmp(str,"u8") == 0)
+    {
+         printf("U8\n"); 
+	 en = 1;
+    }else if (strcmp(str,"u16") == 0)
+    {
+         printf("U16\n"); 
+	 en = 2;
+    }else if (strcmp(str,"u32") == 0)
+    {
+         printf("U32\n"); 
+	 en = 3;
+    }else if (strcmp(str,"float") == 0)
+    {
+         printf("FLOAT\n"); 
+	 en = 4;
+    }else if (strcmp(str,"text") == 0)
+    {
+         printf("TEXT\n"); 
+	 en = 5;
+    }else if (strcmp(str,"custom") == 0)
+    {
+         printf("CUSTOM\n"); 
+	 en = 6;
+    }
+
+    return en;
+    
+}
+
+int convert_variation_type(char * str)
+{
+    int en = -1;
+    
+    if( strcmp(str,"fixed") == 0)
+    {
+ 	printf("Fixed\n"); 
+	en = 0;
+    }else if (strcmp(str,"binary") == 0)
+    {
+         printf("Binary\n"); 
+	 en = 1;
+    }else if (strcmp(str,"swap") == 0)
+    {
+         printf("Swap\n"); 
+	 en = 2;
+    }
+    return en;
+    
+}
+
 
 void parse_variation(xmlDocPtr doc, xmlNodePtr cur)
 {

@@ -40,6 +40,7 @@ FILE *fptr_log, *fptr_dictionary;
 int comm_fd;
 int global_verbose_level;
 char buff_print[100];
+FIELD parser_field_ll;
 
 void do_sent(PACKET_TYPE msg_type_id) {
     HEADER head;
