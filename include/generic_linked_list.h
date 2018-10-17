@@ -1,6 +1,7 @@
 #ifndef GENERIC_LINKED_LIST_H
 #define GENERIC_LINKED_LIST_H
 
+
     void init(ELEMENT** head);
     void print_list(ELEMENT* head);
     ELEMENT* add(ELEMENT* node, DATA data);
