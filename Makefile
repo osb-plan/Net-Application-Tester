@@ -5,9 +5,9 @@ INCDIR=-I./include -I/usr/include/libxml2/
 LIBDIR=-L/usr/lib/x86_64-linux-gnu
 SRCDIR=./source/
 SOURCES=$(SRCDIR)xmlHandle.c $(SRCDIR)server.c $(SRCDIR)bsp.c \
-    $(SRCDIR)generic_linked_list.c
+    $(SRCDIR)generic_linked_list.c $(SRCDIR)core_func_ptr.c
     
-OBJECTS=$(SOURCES:.cpp=.o)
+OBJECTS=$(SOURCES:*.c=.o)
 	EXECUTABLE=server_test
 
 all: $(SOURCES) $(EXECUTABLE)

@@ -10,12 +10,13 @@
 
 #define SOFWARE_VERSION     "0.1"
 
+#define NAME_CHAR_DEPTH 64
+
 /******************************************************************************/
 /*                               ENUM SECTION                                 */
 /******************************************************************************/
 typedef enum {
-    BIT = 0,
-    U8,
+    U8 = 0,
     U16,
     U32,
     TEXT,
@@ -31,6 +32,13 @@ typedef enum {
 /******************************************************************************/
 /*                      VARIATION STRUCT  SECTION                             */
 /******************************************************************************/
+typedef struct build_packet
+{
+    uint32_t byte_len;
+    float actual_value;
+    struct build_packet *next;
+    
+} PACKET_BUILDER;
 
 typedef struct {
     float value;
@@ -44,9 +52,9 @@ typedef struct {
 } __attribute__((packed)) VARIATION_TYPE_BINARY;
 
 typedef struct {
-    float increment;
-    float val1;
-    float val2;
+    float delta_up;
+    float start_value;
+    float end_value;
     
 } __attribute__((packed)) VARIATION_TYPE_SWAP;
 
@@ -57,9 +65,10 @@ typedef struct  {
 } __attribute__((packed)) VARIATION;
 
 typedef struct{
-    char * field_name;
+    char field_name[NAME_CHAR_DEPTH];
     FIELD_TYPE field_type;
-    VARIATION variation;      
+    unsigned int field_repeat_time;
+    VARIATION *variation;      
 } __attribute__((packed)) DATA;
 
 typedef struct field{
@@ -67,15 +76,19 @@ typedef struct field{
     struct field * next;
 } __attribute__((packed)) FIELD;
 
+typedef struct{
+    unsigned int id;
+    char * name;
+    FIELD *first_field;    	
+} __attribute__((packed)) STRUCT_DESCRIPTION;
 
 /******************************************************************************/
 /*                      THREAD SECTION MANAGEMENT                             */
 /******************************************************************************/
 
 typedef struct {
-    uint32_t ms_interval;
-    PACKET_TYPE msg_type_id;
-
+    uint32_t id_field;;
+    FIELD *field;
 } __attribute__((packed)) CHARACTERISTICS_THREAD;
 
 typedef struct {

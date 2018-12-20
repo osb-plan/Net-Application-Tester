@@ -6,6 +6,8 @@ extern "C" {
 #endif
 
 #include <libxml/xmlreader.h>
+
+#include "data_defs.h"
     
 #if defined(LIBXML_READER_ENABLED)
     
@@ -17,6 +19,7 @@ extern "C" {
     /* Convert string related to variation in the relative enum */
     int convert_variation_type(char * str);
     int convert_field_type(char * str);
+    unsigned int convert_field_type_byte(FIELD_TYPE field_type);
     
 #else
     #error "here"

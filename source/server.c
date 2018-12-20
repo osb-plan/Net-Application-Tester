@@ -22,6 +22,13 @@
 #include <sys/stat.h>
 #include <unistd.h>
 
+#include <semaphore.h>
+
+#include <unistd.h>
+#include <unistd.h>
+#include <sys/syscall.h>
+#define gettid() syscall(SYS_gettid)
+
 // External Libraries
 #include <libxml/xmlversion.h>
 #include <libxml/xmlreader.h>
@@ -32,15 +39,28 @@
 #include "data_defs.h"
 #include "bsp.h"
 #include "xmlHandle.h"
+#include "core_func_ptr.h"
 
-
-
+#define FL  fflush(stdout);
 
 FILE *fptr_log, *fptr_dictionary;
 int comm_fd;
 int global_verbose_level;
 char buff_print[100];
+
 FIELD parser_field_ll;
+uint32_t n_fields_parsed = 0;
+uint32_t pseudo_packet_byte_len = 0;
+
+char* pseudo_packet;
+
+PACKET_BUILDER *pck_builder;
+uint32_t exit_thread_called = 0;
+
+sem_t sem_packet;
+
+STRUCT_DESCRIPTION dict_description[MAX_STRUCT_DESCRIPTION];
+unsigned int idx_dict_description = 0;
 
 void do_sent(PACKET_TYPE msg_type_id) {
     HEADER head;
@@ -60,8 +80,6 @@ void do_sent(PACKET_TYPE msg_type_id) {
         default:
             printf("Attention default branch in do_sent\n");
             break;
-
-
     }
     // Send packet
     //write(comm_fd, (char *) &test_packet, sizeof (MSGIN_PACKET));
@@ -75,13 +93,65 @@ void do_sent(PACKET_TYPE msg_type_id) {
     plog(tosend, DEBUG2, 1);*/
 }
 
-void *do_periodic_sent(void *data) {
-    /*    TODO ch_th = *(TODO *) data;
-        for (;;) {
-            do_sent(ch_th.msg_type_id);
-            usleep(ch_th.ms_interval * 1000);
-        }*/
+void *internal_timer(void *data) {
+    FIELD* this_field = ((CHARACTERISTICS_THREAD *) data)->field;
+    uint32_t idx = ((CHARACTERISTICS_THREAD *) data)->id_field;
+
+    /* Extract offset */
+    uint32_t cnt = 0;
+    uint32_t offset;
+    FIELD * field = dict_description[0].first_field;
+
+    /* Retrieve field offset*/
+    for (cnt = 0; field; field = field->next, cnt++) {
+        offset += convert_field_type_byte(field->field_info.field_type);
+        if (cnt == idx)
+            break;
+    }
+
+    float ret_value = 0;
+
+    switch (this_field->field_info.variation->var_type) {
+        case(SWAP):
+            ret_value = _swap_func(this_field, idx);
+            break;
+        case(BINARY):
+            ret_value = _binary_func(this_field, idx);
+            break;
+        case(FIXED):
+            ret_value = _fixed_func(this_field, idx);
+            break;
+    }
+
+    printf("Starting Thread num %u\n", (unsigned int) gettid());
+
+    while (!exit_thread_called) {
+
+        usleep(1000 * this_field->field_info.field_repeat_time);
+        printf("Thread[%d] sleep for %u ms\n"
+                , (unsigned int) gettid()
+                , this_field->field_info.field_repeat_time);
+
+        char *pseudo_packet_tmp = malloc(pseudo_packet_byte_len);
+        printf("Thread[%d] waiting on semaphore\n", (unsigned int) gettid());
+        sem_wait(&sem_packet);
+        *(pseudo_packet + offset) = ret_value;
+        memcpy(pseudo_packet_tmp, pseudo_packet, pseudo_packet_byte_len);
+        sem_post(&sem_packet);
+
+        send(comm_fd, pseudo_packet, pseudo_packet_byte_len, 0);
+
+        free(pseudo_packet_tmp);
+    }
+    printf("Thread field[%d] Exit!", (unsigned int) pthread_self());
+
+    /* call the cb to inform the user time is out */
+    //(*function_pointer)();
+
+    pthread_exit(NULL);
 }
+
+//void send_packet(unsigned int fd, )
 
 int main(int argc, char *argv[]) {
 
@@ -112,6 +182,7 @@ int main(int argc, char *argv[]) {
                 break;
             case 'd': d_flag = (optarg);
                 break;
+                /* TODO fare parsing dell'IP e della porta */
             default: //print_usage(); 
                 exit(EXIT_FAILURE);
         }
@@ -140,7 +211,6 @@ int main(int argc, char *argv[]) {
                 return EXIT_FAILURE;
             }
         }
-
 
         if (!stat(d_flag, &sb)) {
             if ((sb.st_mode & S_IFMT) != S_IFREG) {
@@ -172,7 +242,7 @@ int main(int argc, char *argv[]) {
             , d_flag
             );
     printf("-----------------------------------------------------------------\n");
-
+    FL;
     plog("Entered the main loop", INFO, 0);
 
     xmlDocPtr doc;
@@ -203,95 +273,110 @@ int main(int argc, char *argv[]) {
     printf("Ok ready for parsing\n");
     parse_config(doc, cur);
 
+    /* Now Packet Builder is filled */
+    memset(pseudo_packet, 0, pseudo_packet_byte_len);
 
-    return 0;
-
-    //pthread_create(&thread, NULL, do_periodic_sent, (void *) &ch_th_pool1[1]);
-
-
+    /* Fare la connessione */
     while (1) {
-        usleep(1000000);
-        plog("MAIN LOOP", INFO, 0);
-        printf("MAIN LOOP");
-        fflush(stdout);
-    }
-    return EXIT_SUCCESS;
+        listen_fd = socket(AF_INET, SOCK_STREAM, 0);
 
+        bzero(&servaddr, sizeof (servaddr));
 
-    listen_fd = socket(AF_INET, SOCK_STREAM, 0);
+        servaddr.sin_family = AF_INET;
+        servaddr.sin_addr.s_addr = htons(INADDR_ANY);
+        servaddr.sin_port = htons(6178);
 
-    bzero(&servaddr, sizeof (servaddr));
+        bind(listen_fd, (struct sockaddr *) &servaddr, sizeof (servaddr));
+        printf("Bind Done\n");
+        listen(listen_fd, 10);
+        printf("After List Waiting for connection...\n");
+        comm_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
+        printf("Accepted a Client %d\n", comm_fd);
 
-    servaddr.sin_family = AF_INET;
-    servaddr.sin_addr.s_addr = htons(INADDR_ANY);
-    servaddr.sin_port = htons(6178);
-
-    bind(listen_fd, (struct sockaddr *) &servaddr, sizeof (servaddr));
-    printf("Bind Done\n");
-    listen(listen_fd, 10);
-    printf("After List Waiting for connection...\n");
-    comm_fd = accept(listen_fd, (struct sockaddr*) NULL, NULL);
-    printf("Accepted a Client %d\n", comm_fd);
-
-
-
-    uint16_t tot_len_received = 0;
-
-    while (1) {
-        char *str_ = "pippo\n";
-        bzero(buffer, 1024);
-        int flag = 0;
-        // Receive in blocking mode a packet        
-        int n = recv(comm_fd, buffer, sizeof (MSGIN_PACKET), 0);
-        if (n < 0) {
-            perror("Problem in receive packet ERROR CODE [0001]");
-            return EXIT_FAILURE;
+        uint16_t tot_len_received = 0;
+        unsigned int err = 0;
+        if (0 != (err = sem_init(&sem_packet, 0, 1))) {
+            printf("Unable to init Semaphore! Error = %u", err);
+            plog("Unable to init Semaphore! Error = %d", err, 1);
         }
-        printf("Received raw msg.\n");
+        FL;
 
-        if (flag == 0) {
-            if ((n + tot_len_received) >= sizeof (MSGIN_PACKET)) {
-                printf("Msg received \n");
-                MSGIN_PACKET *inpack;
-                inpack = (MSGIN_PACKET *) buffer;
 
-                // Control if the packet received is ping
-                if (inpack->header.type == PING_PACKET_ID) {
-                    printf("Msg received PING\n");
-                    // exit from this loop and enter in the core application loop
-                    flag = 1;
+        while (1) {
+            char *str_ = "pippo\n";
+            bzero(buffer, 1024);
+            int flag = 0;
+            // Receive in blocking mode a packet        
+            /*int n = recv(comm_fd, buffer, sizeof (MSGIN_PACKET), 0);
+            if (n < 0) {
+                perror("Problem in receive packet ERROR CODE [0001]");
+                return EXIT_FAILURE;
+            }
+            printf("Received raw msg.\n");
+
+            if (flag == 0) {
+                if ((n + tot_len_received) >= sizeof (MSGIN_PACKET)) {
+                    printf("Msg received \n");
+                    MSGIN_PACKET *inpack;
+                    inpack = (MSGIN_PACKET *) buffer;
+
+                    // Control if the packet received is ping
+                    if (inpack->header.type == PING_PACKET_ID) {
+                        printf("Msg received PING\n");
+                        // exit from this loop and enter in the core application loop
+                        flag = 1;
+                    }
+                } else {
+                    tot_len_received += n;
                 }
-            } else {
-                printf("Entered in the core loop\n");
 
-                pthread_t thread;
-                CHARACTERISTICS_THREAD ch_th_pool1[1];
+            } else */
+            {
+                /* Start thread to test app */
+                uint32_t idx = 0;
+                FIELD *actual_field;
 
-                /* Set up a pool of thread for test*/
-                ch_th_pool1[0].ms_interval = 250;
-                ch_th_pool1[0].msg_type_id = MAIN_A_ID;
+                pthread_t * list_of_spaned_threads[n_fields_parsed];
+                for (actual_field = dict_description[0].first_field;
+                        actual_field;
+                        actual_field = actual_field->next) 
+                {
+                    pthread_t *mthread = malloc(sizeof (pthread_t));
 
-                pthread_create(&thread, NULL, do_periodic_sent, (void *) &ch_th_pool1[0]);
-                while (1) {
-                    printf("Server Alive...\n");
-                    usleep(5000000);
+                    CHARACTERISTICS_THREAD * ch_thread = 
+                            malloc(sizeof(CHARACTERISTICS_THREAD));
+                    ch_thread->id_field = idx;
+                    ch_thread->field = actual_field;
 
+                    /* build the thread info */
+                    pthread_create(mthread,
+                            NULL,
+                            internal_timer,
+                            (void *) ch_thread);
+                    list_of_spaned_threads[idx] = mthread;
+                    idx++;
+                }
+
+                for (idx = 0; idx < n_fields_parsed; idx++) {
+                    if (!pthread_join(*list_of_spaned_threads[idx], NULL));
+                    printf("Thread[%u] joined\n", idx);
+                    FL;
                 }
             }
-
         }
-
-
-        /*        printf("\n Sent Packet header %x %d\n", packet_sent.header, 
-                sizeof(packet_sent));
-                write(comm_fd, (char *) &packet_sent, sizeof(packet_sent));*/
         usleep(2000000);
     }
-
-
-
-
-
-
+    return EXIT_SUCCESS;
 }
+
+
+
+
+
+
+
+
+
+
+
 

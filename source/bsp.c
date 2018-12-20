@@ -47,7 +47,7 @@ void plog(char *str, int verbose_level, int whocall)
     if(verbose_level <= global_verbose_level && verbose_level >= 0)
     {
     pthread_mutex_lock(&log_mutex);
-        fprintf(fptr_log, "%s: %s %d\n"
+        fprintf(fptr_log, "%s: %s [ID call = %d]\n"
                 , timestamp()
                 , str
                 , whocall);

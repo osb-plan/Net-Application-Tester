@@ -13,7 +13,7 @@ void plog(char *str, int verbose_level, int whocall);
 
 void SIGINThandler(int);
 
-
+#define MAX_STRUCT_DESCRIPTION
 
 typedef enum{
     INFO = 0,

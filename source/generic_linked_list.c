@@ -16,7 +16,7 @@ void print_list(FIELD* head) {
     {
         printf("%s \n", temp->field_info.field_name);
         printf("%d \n", temp->field_info.field_type);
-        printf("%d \n", temp->field_info.variation.var_type);        
+        printf("%d \n", temp->field_info.variation->var_type);        
     }
     printf("-------------------------------------\n");
 
