@@ -1,6 +1,6 @@
 # Net-Application-Tester
 
-Please this project is under development.
+Please this project is under development. This application is intented for use only on Unix/Linux machines.
 Thank you.
 
 DEPENDENCIES
@@ -22,6 +22,7 @@ make
 
 -v verbosity level.
 
-
+TEST
+Tested and compiled with gcc 5.4.0 20160609
 
 
