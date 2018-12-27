@@ -6,7 +6,7 @@ Thank you.
 DEPENDENCIES
 
 libxml2, if it doesn't work create the symbolic link in 
-/usr/lib/x86_64-linux-gnu folder.
+/usr/lib/x86_64-linux-gnu folder, and then pthread.
 
 
 USAGE
