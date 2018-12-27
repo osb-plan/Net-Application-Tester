@@ -8,7 +8,7 @@ SOURCES=$(SRCDIR)xmlHandle.c $(SRCDIR)server.c $(SRCDIR)bsp.c \
     $(SRCDIR)generic_linked_list.c $(SRCDIR)core_func_ptr.c
     
 OBJECTS=$(SOURCES:*.c=.o)
-	EXECUTABLE=server_test
+	EXECUTABLE=neta
 
 all: $(SOURCES) $(EXECUTABLE)
 	    
@@ -19,4 +19,4 @@ $(EXECUTABLE): $(OBJECTS)
 	    $(CC) $(CFLAGS) $< -o $@
 
 clean:
-	rm *.o server_test
+	rm *.o neta
