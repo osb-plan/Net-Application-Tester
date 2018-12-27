@@ -5,8 +5,9 @@ Thank you.
 
 DEPENDENCIES
 
-libxml2, if it doesn't work create the symbolic link in 
-/usr/lib/x86_64-linux-gnu folder, and then pthread.
+apt-get install libxml2
+If it doesn't work create the symbolic link in /usr/lib/x86_64-linux-gnu folder.
+The other dependencie is libpthread.
 
 
 USAGE
