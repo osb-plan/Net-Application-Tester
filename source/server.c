@@ -62,6 +62,14 @@ sem_t sem_packet;
 STRUCT_DESCRIPTION dict_description[MAX_STRUCT_DESCRIPTION];
 unsigned int idx_dict_description = 0;
 
+void print_usage() {
+
+    fprintf(stderr, "You have to provide the following arguments:\n");
+    fprintf(stderr, "-d => dictionary file\n");
+    fprintf(stderr, "-l => log file\n");
+    fprintf(stderr, "-v => verbose level [1-3\n");
+}
+
 void do_sent(PACKET_TYPE msg_type_id) {
     HEADER head;
     MSGIN_PACKET test_packet;
@@ -183,7 +191,8 @@ int main(int argc, char *argv[]) {
             case 'd': d_flag = (optarg);
                 break;
                 /* TODO fare parsing dell'IP e della porta */
-            default: //print_usage(); 
+            default: 
+		print_usage(); 
                 exit(EXIT_FAILURE);
         }
     }
@@ -220,6 +229,7 @@ int main(int argc, char *argv[]) {
 
     } else {
         printf("ERROR control file logging option and dictionary file!\n");
+	print_usage();
         return EXIT_FAILURE;
     }
 
