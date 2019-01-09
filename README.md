@@ -1,12 +1,13 @@
 # Net-Application-Tester
 
-Please this project is under development.
+Please this project is under development. This application is intented for use only on Unix/Linux machines.
 Thank you.
 
 DEPENDENCIES
 
-libxml2, if it doesn't work create the symbolic link in 
-/usr/lib/x86_64-linux-gnu folder.
+apt-get install libxml2
+If it doesn't work create the symbolic link in /usr/lib/x86_64-linux-gnu folder.
+The other dependencie is libpthread.
 
 
 USAGE
@@ -21,6 +22,7 @@ make
 
 -v verbosity level.
 
-
+TEST
+Tested and compiled with gcc 5.4.0 20160609
 
 
